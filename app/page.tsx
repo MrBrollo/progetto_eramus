@@ -19,12 +19,7 @@ export default function LoginPage() {
         });
 
         const data = await response.json();
-
-        if (response.ok) {
-            alert(`Benvenuto ${data.nome} ${data.cognome}`);
-        } else {
-            alert(data.error);
-        }
+        alert(data.message);
 
         //validazione dei campi obbligatori
         if (!username || !password) {
