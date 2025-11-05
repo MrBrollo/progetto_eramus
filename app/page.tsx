@@ -1,66 +1,120 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+import React, { useState } from "react";
+
+export default function LoginPage() {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const response = await fetch("http://localhost:4567//login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert(`Benvenuto ${data.nome} ${data.cognome}`);
+        } else {
+            alert(data.error);
+        }
+
+        //validazione dei campi obbligatori
+        if (!username || !password) {
+            setError("Compilare tutti i campi obbligatori.");
+            return;
+        }
+
+        //Validazione password secondo linee guida Agid
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/;
+
+        if (!passwordRegex.test(password)) {
+            setError("La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale."
+            );
+            return;
+        }
+
+        alert(`Login eseguito come ${username}`);
+        setError("");
+    };
+
+    return (
+        <div className="it-page-section min-vh-100 d-flex align-items-center bg-light">
+            <div className="container">
+                <div className="row justify-content-center">
+                    <div className="col-12 col-md-6 col-lg-4">
+                        <div className="card shadow-lg border-0">
+                            <div className="card-body p-4">
+                                <h1 className="h4 text-center mb-4 text-dark fw-bold">Login</h1>
+
+                                {error && (
+                                    <div className="alert alert-danger" role="alert">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <form onSubmit={handleSubmit} noValidate>
+                                    <div className="mb-3">
+                                        <label htmlFor="username" className="form-label fw-semibold d-block">
+                                            Username <span className="text-danger">*</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            id="username"
+                                            required
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            placeholder="Inserisci il tuo username"
+                                            aria-describedby="usernameHelp"
+                                        />
+                                        <small id="usernameHelp" className="form-text text-muted">
+                                            Inserisci il tuo username.
+                                        </small>
+                                    </div>
+
+                                    <div className=" mb-3">
+                                        <label htmlFor="password" className="form-label fw-semibold">
+                                            Password <span className="text-danger">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            className="form-control"
+                                            id="password"
+                                            required
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            aria-describedby="passwordHelp"
+                                            placeholder="Inserisci la tua password"
+                                        />
+                                        <small id="passwordHelp" className="form-text text-muted d-block">
+                                            Deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale.
+                                        </small>
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary btn-block w-100 mt-3"
+                                    >
+                                        Accedi
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <p className="text-center mt-3 text-muted small">
+                            Accesso riservato - conforme alle linee guida Agid.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    );
 }

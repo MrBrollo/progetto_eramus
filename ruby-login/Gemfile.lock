@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    pg (1.6.2-x64-mingw-ucrt)
+
+PLATFORMS
+  x64-mingw-ucrt
+
+DEPENDENCIES
+  pg
+
+BUNDLED WITH
+   2.6.9

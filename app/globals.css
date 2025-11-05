@@ -3,6 +3,17 @@
   --foreground: #171717;
 }
 
+::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+
+input:focus::placeholder,
+input:not(:placeholder-shown)::placeholder {
+  opacity: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
