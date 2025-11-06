@@ -1,0 +1,31 @@
+[2025-11-06 20:59:24] INFO  WEBrick 1.9.1
+[2025-11-06 20:59:24] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-06 20:59:24] INFO  WEBrick::HTTPServer#start: pid=26028 port=4567
+[2025-11-06 20:59:26] ERROR '/' not found.
+::1 - - [06/Nov/2025:20:59:26 W. Europe Standard Time] "GET / HTTP/1.1" 404 270
+[2025-11-06 20:59:27] ERROR '/favicon.ico' not found.
+::1 - - [06/Nov/2025:20:59:27 W. Europe Standard Time] "GET /favicon.ico HTTP/1.1" 404 281
+[2025-11-06 20:59:47] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:70:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [06/Nov/2025:20:59:47 W. Europe Standard Time] "GET /login HTTP/1.1" 500 319
+[2025-11-06 21:15:39] ERROR '/users/register' not found.
+::1 - - [06/Nov/2025:21:15:39 W. Europe Standard Time] "POST /users/register HTTP/1.1" 404 284
+[2025-11-06 21:16:07] ERROR '/' not found.
+::1 - - [06/Nov/2025:21:16:07 W. Europe Standard Time] "GET / HTTP/1.1" 404 270
+[2025-11-06 21:16:34] ERROR '/users/register' not found.
+::1 - - [06/Nov/2025:21:16:34 W. Europe Standard Time] "GET /users/register HTTP/1.1" 404 284
+[2025-11-06 21:18:32] INFO  going to shutdown ...
+[2025-11-06 21:18:32] INFO  WEBrick::HTTPServer#start done.
+[2025-11-06 21:18:40] INFO  WEBrick 1.9.1
+[2025-11-06 21:18:40] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-06 21:18:40] INFO  WEBrick::HTTPServer#start: pid=14840 port=4567
+[2025-11-06 21:18:42] ERROR '/' not found.
+::1 - - [06/Nov/2025:21:18:42 W. Europe Standard Time] "GET / HTTP/1.1" 404 270
+::1 - - [06/Nov/2025:21:18:57 W. Europe Standard Time] "POST /users/register HTTP/1.1" 201 59
+[2025-11-06 21:21:44] INFO  going to shutdown ...
+[2025-11-06 21:21:44] INFO  WEBrick::HTTPServer#start done.

@@ -3,6 +3,7 @@ require "json"
 require "webrick"
 require "bcrypt"
 require_relative "db_connection"
+require_relative "user.rb"
 
 PORT = 4567
 
@@ -17,7 +18,7 @@ server = WEBrick::HTTPServer.new(
 )
 
 # Endpoint di LOGIN
-server.mount_proc "/login" do |req, res|
+server.mount_proc "/users/login" do |req, res|
     res["Content-Type"] = "application/json"
     res["Access-Control-Allow-Origin"] = "*"
     res["Access-Control-Allow-Methods"] = "POST, OPTIONS"
@@ -29,12 +30,10 @@ server.mount_proc "/login" do |req, res|
     end
 
     begin
-        data = JSON.parse(req.body)
+        
+        user = User.from_json(JSON.parse(req.body))
 
-        username = data["username"]
-        password = data["password"]
-
-        if username.nil? || password.nil? || username.strip.empty? || password.strip.empty?
+        if user.username.nil? || user.password.nil? || user.username.strip.empty? || user.password.strip.empty?
             res.status = 400
             res.body = { success: false, message: "Inserisci tutti i campi obbligatori" }
             next
@@ -42,21 +41,21 @@ server.mount_proc "/login" do |req, res|
 
         conn = db_connection
 
-        result = conn.exec_params("SELECT * FROM utente WHERE username = $1 LIMIT 1", [username])
+        result = conn.exec_params("SELECT * FROM utente WHERE username = $1 LIMIT 1", [user.username])
 
         if result.ntuples > 0
-            utente = result[0]
-            hashed_password = utente["password"]
+            utente = User.from_json(result[0])
+            hashed_password = utente.password
 
-            if BCrypt::Password.new(hashed_password) == password
+            if BCrypt::Password.new(hashed_password) == user.password
                 res.status = 200
                 res.body = {
                     success: true,
                     message: "Accesso effettuato con successo!",
                     utente: {
-                        nome: utente["nome"],
-                        cognome: utente["cognome"]
-                        username: utente["username"]
+                        nome: utente.nome,
+                        cognome: utente.cognome,
+                        username: utente.username
                     }
                 }.to_json
             else
@@ -71,7 +70,7 @@ server.mount_proc "/login" do |req, res|
     rescue JSON::ParseError
         res.status = 400
         res.body = { success: false, message: "Formato JSON non valido" }.to_json
-    rescue PG:Error => e
+    rescue PG::Error => e
         res.status = 400
         res.body = { success: false, message: "Errore database: #{e.message}" }.to_json
     ensure
@@ -80,7 +79,7 @@ server.mount_proc "/login" do |req, res|
 end
 
 #Endpoint di REGISTRAZIONE
-server.mount_proc "/register" do |req, res|
+server.mount_proc "/users/register" do |req, res|
     res["Content-Type"] = "application/json"
     res["Access-Control-Allow-Origin"] = "*"
     res["Access-Control-Allow-Methods"] = "POST, OPTIONS"
@@ -92,14 +91,9 @@ server.mount_proc "/register" do |req, res|
     end
 
     begin
-        data = JSON.parse(req.body)
+        user = User.from_json(JSON.parse(req.body))
 
-        username = data["username"]
-        password = data["password"]
-        nome = data["nome"]
-        cognome = data["cognome"]
-
-        if username.nil? || password.nil? || nome.nil? || cognome.nil? || username.strip.empty? || password.strip.empty?
+        if user.username.nil? || user.password.nil? || user.nome.nil? || user.cognome.nil? || user.username.strip.empty? || user.password.strip.empty?
             res.status = 400
             res.body = { success: false, message: "Inserisci tutti i campi obbligatori" }.to_json
             next
@@ -107,17 +101,17 @@ server.mount_proc "/register" do |req, res|
 
         conn = db_connection
 
-        check = conn.exec_params("SELECT * FROM utente WHERE username = $1", [username])
+        check = conn.exec_params("SELECT * FROM utente WHERE username = $1", [user.username])
         if check.ntuples > 0
             res.status = 409
             res.body = { success: false, message: "Username già esistente" }.to_json
             next
         end
 
-        hashed_password = BCrypt::Password.create(password)
+        hashed_password = BCrypt::Password.create(user.password)
 
         conn.exec_params(
-            "INSERT INTO utente (username, password, nome, cognome) VALUES ($1, $2, $3, $4)", [username, password, nome, cognome]
+            "INSERT INTO utente (username, password, nome, cognome, data_nascita) VALUES ($1, $2, $3, $4, $5)", [user.username, user.password, user.nome, user.cognome, user.data_nascita]
         )
 
         res.status = 201
