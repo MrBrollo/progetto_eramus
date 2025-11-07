@@ -78,6 +78,45 @@ server.mount_proc "/users/login" do |req, res|
     end
 end
 
+#ENDPOINT GET degli utenti
+
+server.mount_proc "/users/get" do |req, res|
+    res["Content-Type"] = "application/json"
+    res["Access-Control-Allow-Origin"] = "*"
+    res["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    res["Access-Control-Allow-Headers"] = "Content-Type"
+
+    if req.request_method == "OPTIONS"
+        res.status = 200
+        next
+    end
+
+    begin
+        conn = db_connection
+        result = conn.exec_params("SELECT * FROM utente ORDER BY id ASC")
+
+        utenti = result.map do |r| 
+            {
+                id: r["id"],
+                username: r["username"],
+                password: r["password"],
+                nome: r["nome"],
+                cognome: r["cognome"],
+                data_nascita: r["data_nascita"]
+            }
+    end
+
+    res.status = 200
+    res.body = { success: true, utenti: utenti }.to_json
+
+    rescue PG::Error => e
+        res.status = 400
+        res.body = { success: false, message: "Errore database: #{e.message}" }.to_json
+    ensure
+        conn.close if conn
+    end
+end
+
 #Endpoint di REGISTRAZIONE
 server.mount_proc "/users/register" do |req, res|
     res["Content-Type"] = "application/json"
