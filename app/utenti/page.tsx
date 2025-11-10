@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
+import axios from "axios";
 
 interface User {
     id: number;
@@ -16,18 +17,15 @@ export default function UserPage() {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
 
+
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await fetch("http://localhost:4567/users/get");
-                if (!res.ok) throw new Error("Errore nella risposta del server");
-
-                const data = await res.json();
-
-                if (data.success) {
-                    setUtenti(data.utenti);
+                const res = await axios.get("http://localhost:4567/users/get");
+                if (res.data.success) {
+                    setUtenti(res.data.utenti);
                 } else {
-                    setError(data.message || "Errore nel caricamento utenti");
+                    setError(res.data.message || "Errore nel caricamento utenti");
                 }
             } catch (err) {
                 setError("Impossibile connettersi al server Ruby");
@@ -38,6 +36,43 @@ export default function UserPage() {
 
         fetchUser();
     }, []);
+
+    const handleCreateUser = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+
+        const payload = {
+            username: formData.get("username"),
+            password: formData.get("password"),
+            nome: formData.get("nome"),
+            cognome: formData.get("cognome"),
+            data_nascita: formData.get("data_nascita"),
+        };
+
+        try {
+            const res = await axios.post("http://localhost:4567/users/register", payload, {
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (res.data.success) {
+                alert("Utente aggiunto con successo!");
+                form.reset();
+
+                //Aggiunge il nuovo utente alla tabella
+                const refreshRes = await axios.get("http://localhost:4567/users/get");
+                if (refreshRes.data.success) {
+                    setUtenti(refreshRes.data.utenti);
+                }
+            } else {
+                alert(res.data.message || "Errore durante la registrazione");
+            }
+        } catch (err: any) {
+            console.log(err);
+            alert(err.response?.data?.message || "Errore di connessione al server Ruby");
+        }
+    };
 
     return (
         <div className="container my-5 p-4 rounded shadow-sm"
@@ -73,7 +108,6 @@ export default function UserPage() {
                             <tr>
                                 <th scope="col">ID</th>
                                 <th scope="col">Username</th>
-                                <th scope="col">Password</th>
                                 <th scope="col">Nome</th>
                                 <th scope="col">Cognome</th>
                                 <th scope="col">Data di Nascita</th>
@@ -84,7 +118,6 @@ export default function UserPage() {
                                 <tr key={u.id}>
                                     <td>{u.id}</td>
                                     <td>{u.username}</td>
-                                    <td>{u.password}</td>
                                     <td>{u.nome}</td>
                                     <td>{u.cognome}</td>
                                     <td>{u.data_nascita}</td>
@@ -100,6 +133,76 @@ export default function UserPage() {
                     Nessun utente trovato.
                 </div>
             )}
+
+            <div className="mt-5">
+                <h5 className="text-center fw-bold mb-4" style={{ color: "#1C2024" }}>Aggiungi un nuovo utente</h5>
+                <form id="form-create-user" className="row g-3" onSubmit={handleCreateUser}>
+                    <div className="col-md-6">
+                        <div className="">
+                            <label htmlFor="inputUsername">Username <span className="text-danger">*</span></label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="inputUsername"
+                                name="username"
+                                placeholder="Inserisci username"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="">
+                            <label htmlFor="inputPassword">Password <span className="text-danger">*</span></label>
+                            <input
+                                type="password"
+                                className="form-control"
+                                id="inputPassword"
+                                name="password"
+                                placeholder="Inserisci password"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="">
+                            <label htmlFor="inputNome">Nome</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="inputNome"
+                                name="nome"
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="">
+                            <label htmlFor="inputCognome">Cognome</label>
+                            <input
+                                type="text"
+                                className="form-control"
+                                id="inputCognome"
+                                name="cognome"
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-4">
+                        <div className="">
+                            <label htmlFor="inputDataNascita">Data di nascita</label>
+                            <input
+                                type="date"
+                                className="form-control"
+                                id="inputDataNascita"
+                                name="data_nascita"
+                            />
+                        </div>
+                    </div>
+                    <div className="col-12 text-end">
+                        <button type="submit" className="btn btn-primary">
+                            Aggiungi Utente
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }

@@ -1,174 +1,118 @@
+require "sinatra"
+require "sinatra/cross_origin"
 require "pg"
-require "json"
-require "webrick"
 require "bcrypt"
 require_relative "db_connection"
-require_relative "user.rb"
+require_relative "user"
 
-PORT = 4567
+set :port, 4567
+enable :cross_origin
 
-log_file = File.open("webrick.log", "a+")
-logger = WEBrick::Log.new(log_file)
-access_log = [[log_file, WEBrick::AccessLog::COMMON_LOG_FORMAT]]
-
-server = WEBrick::HTTPServer.new(
-    Port: 4567,
-    Logger: logger,
-    AccessLog: access_log
-)
-
-# Endpoint di LOGIN
-server.mount_proc "/users/login" do |req, res|
-    res["Content-Type"] = "application/json"
-    res["Access-Control-Allow-Origin"] = "*"
-    res["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    res["Access-Control-Allow-Headers"] = "Content-Type"
-
-    if req.request_method == "OPTIONS"
-        res.status = 200
-        next
-    end
-
-    begin
-        
-        user = User.from_json(JSON.parse(req.body))
-
-        if user.username.nil? || user.password.nil? || user.username.strip.empty? || user.password.strip.empty?
-            res.status = 400
-            res.body = { success: false, message: "Inserisci tutti i campi obbligatori" }
-            next
-        end
-
-        conn = db_connection
-
-        result = conn.exec_params("SELECT * FROM utente WHERE username = $1 LIMIT 1", [user.username])
-
-        if result.ntuples > 0
-            utente = User.from_json(result[0])
-            hashed_password = utente.password
-
-            if BCrypt::Password.new(hashed_password) == user.password
-                res.status = 200
-                res.body = {
-                    success: true,
-                    message: "Accesso effettuato con successo!",
-                    utente: {
-                        nome: utente.nome,
-                        cognome: utente.cognome,
-                        username: utente.username
-                    }
-                }.to_json
-            else
-                res.status = 401
-                res.body = { success: false, message: "Credenziali non valide" }.to_json
-            end
-        else
-            res.status = 401
-            res.body = { success: false, message: "Utente non trovato" }.to_json
-        end
-
-    rescue JSON::ParseError
-        res.status = 400
-        res.body = { success: false, message: "Formato JSON non valido" }.to_json
-    rescue PG::Error => e
-        res.status = 400
-        res.body = { success: false, message: "Errore database: #{e.message}" }.to_json
-    ensure
-        conn.close if conn
-    end
+configure do
+  enable :cross_origin
+  set :bind, "0.0.0.0"
 end
 
-#ENDPOINT GET degli utenti
-
-server.mount_proc "/users/get" do |req, res|
-    res["Content-Type"] = "application/json"
-    res["Access-Control-Allow-Origin"] = "*"
-    res["Access-Control-Allow-Methods"] = "GET, OPTIONS"
-    res["Access-Control-Allow-Headers"] = "Content-Type"
-
-    if req.request_method == "OPTIONS"
-        res.status = 200
-        next
-    end
-
-    begin
-        conn = db_connection
-        result = conn.exec_params("SELECT * FROM utente ORDER BY id ASC")
-
-        utenti = result.map do |r| 
-            {
-                id: r["id"],
-                username: r["username"],
-                password: r["password"],
-                nome: r["nome"],
-                cognome: r["cognome"],
-                data_nascita: r["data_nascita"]
-            }
-    end
-
-    res.status = 200
-    res.body = { success: true, utenti: utenti }.to_json
-
-    rescue PG::Error => e
-        res.status = 400
-        res.body = { success: false, message: "Errore database: #{e.message}" }.to_json
-    ensure
-        conn.close if conn
-    end
+before do
+  content_type :json
+  response.headers["Access-Control-Allow-Origin"] = "*"
+  response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+  response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
 end
 
-#Endpoint di REGISTRAZIONE
-server.mount_proc "/users/register" do |req, res|
-    res["Content-Type"] = "application/json"
-    res["Access-Control-Allow-Origin"] = "*"
-    res["Access-Control-Allow-Methods"] = "POST, OPTIONS"
-    res["Access-Control-Allow-Headers"] = "Content-Type"
-
-    if req.request_method == "OPTIONS"
-        res.status = 200
-        next
-    end
-
-    begin
-        user = User.from_json(JSON.parse(req.body))
-
-        if user.username.nil? || user.password.nil? || user.nome.nil? || user.cognome.nil? || user.username.strip.empty? || user.password.strip.empty?
-            res.status = 400
-            res.body = { success: false, message: "Inserisci tutti i campi obbligatori" }.to_json
-            next
-        end
-
-        conn = db_connection
-
-        check = conn.exec_params("SELECT * FROM utente WHERE username = $1", [user.username])
-        if check.ntuples > 0
-            res.status = 409
-            res.body = { success: false, message: "Username già esistente" }.to_json
-            next
-        end
-
-        hashed_password = BCrypt::Password.create(user.password)
-
-        conn.exec_params(
-            "INSERT INTO utente (username, password, nome, cognome, data_nascita) VALUES ($1, $2, $3, $4, $5)", [user.username, user.password, user.nome, user.cognome, user.data_nascita]
-        )
-
-        res.status = 201
-        res.body = {success: true, message: "Utente registrato con successo" }.to_json
-
-    rescue JSON::ParseError
-        res.status = 400
-        res.body = { success: false, message: "Formato JSON non valido" }.to_json
-
-    rescue PG::ParseError
-        res.status = 400
-        res.body = { success: false, message: "Errore database #{e.message}" }.to_json
-    ensure
-        conn.close if conn
-    end
+options "*" do
+  200
 end
 
-trap("INT") { server.shutdown }
+post "/users/register" do
+  begin
+    data = JSON.parse(request.body.read)
+    user = User.from_json(data)
+    conn = db_connection
 
-puts "Server Ruby in esecuzione su http://localhost:#{PORT}"
-server.start
+    if user.username.to_s.strip.empty? || user.password.to_s.strip.empty?
+      status 400
+      return { success: false, message: "Campi obbligatori mancanti" }.to_json
+    end
+
+    check = conn.exec_params("SELECT 1 FROM utente WHERE username = $1", [user.username])
+    if check.ntuples > 0
+      status 409
+      return { success: false, message: "Username già esistente" }.to_json
+    end
+
+    hashed_password = BCrypt::Password.create(user.password)
+    conn.exec_params(
+      "INSERT INTO utente (username, password, nome, cognome, data_nascita)
+       VALUES ($1, $2, $3, $4, $5)",
+      [user.username, hashed_password, user.nome, user.cognome, user.data_nascita]
+    )
+
+    status 201
+    { success: true, message: "Utente registrato con successo" }.to_json
+
+  rescue JSON::ParserError
+    status 400
+    { success: false, message: "Formato JSON non valido" }.to_json
+  rescue PG::Error => e
+    status 500
+    { success: false, message: "Errore database: #{e.message}" }.to_json
+  ensure
+    conn&.close
+  end
+end
+
+post "/users/login" do
+  begin
+    data = JSON.parse(request.body.read)
+    user = User.from_json(data)
+    conn = db_connection
+
+    result = conn.exec_params("SELECT * FROM utente WHERE username = $1 LIMIT 1", [user.username])
+
+    if result.ntuples > 0 && BCrypt::Password.new(result[0]["password"]) == user.password
+      status 200
+      {
+        success: true,
+        message: "Login effettuato",
+        utente: {
+          nome: result[0]["nome"],
+          cognome: result[0]["cognome"],
+          username: result[0]["username"]
+        }
+      }.to_json
+    else
+      status 401
+      { success: false, message: "Credenziali non valide" }.to_json
+    end
+  rescue
+    status 400
+    { success: false, message: "Errore durante il login" }.to_json
+  ensure
+    conn&.close
+  end
+end
+
+get "/users/get" do
+  begin
+    conn = db_connection
+    result = conn.exec("SELECT id, username, nome, cognome, data_nascita FROM utente ORDER BY id ASC")
+
+    utenti = result.map do |r|
+      {
+        id: r["id"],
+        username: r["username"],
+        nome: r["nome"],
+        cognome: r["cognome"],
+        data_nascita: r["data_nascita"]
+      }
+    end
+
+    { success: true, utenti: utenti }.to_json
+  rescue PG::Error => e
+    status 500
+    { success: false, message: "Errore database: #{e.message}" }.to_json
+  ensure
+    conn&.close
+  end
+end

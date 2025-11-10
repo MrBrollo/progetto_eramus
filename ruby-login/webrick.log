@@ -29,3 +29,218 @@
 ::1 - - [06/Nov/2025:21:18:57 W. Europe Standard Time] "POST /users/register HTTP/1.1" 201 59
 [2025-11-06 21:21:44] INFO  going to shutdown ...
 [2025-11-06 21:21:44] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 16:03:38] INFO  WEBrick 1.9.1
+[2025-11-10 16:03:38] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 16:03:38] INFO  WEBrick::HTTPServer#start: pid=16544 port=4567
+::1 - - [10/Nov/2025:16:03:44 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 380
+::1 - - [10/Nov/2025:16:04:36 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:16:04:42 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 380
+::1 - - [10/Nov/2025:16:05:07 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 16:10:26] INFO  going to shutdown ...
+[2025-11-10 16:10:26] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 16:10:37] INFO  WEBrick 1.9.1
+[2025-11-10 16:10:37] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 16:10:37] INFO  WEBrick::HTTPServer#start: pid=3856 port=4567
+::1 - - [10/Nov/2025:16:10:44 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:16:11:48 W. Europe Standard Time] "POST /users/register HTTP/1.1" 201 59
+::1 - - [10/Nov/2025:16:11:56 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:18:13 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+[2025-11-10 16:18:19] INFO  going to shutdown ...
+[2025-11-10 16:18:19] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 16:18:27] INFO  WEBrick 1.9.1
+[2025-11-10 16:18:27] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 16:18:27] INFO  WEBrick::HTTPServer#start: pid=19768 port=4567
+::1 - - [10/Nov/2025:16:18:49 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:19:34 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 16:20:25] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:159:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:16:20:25 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+[2025-11-10 16:20:25] ERROR '/favicon.ico' not found.
+::1 - - [10/Nov/2025:16:20:25 W. Europe Standard Time] "GET /favicon.ico HTTP/1.1" 404 281
+[2025-11-10 16:23:17] INFO  going to shutdown ...
+[2025-11-10 16:23:17] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 16:23:22] INFO  WEBrick 1.9.1
+[2025-11-10 16:23:22] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 16:23:22] INFO  WEBrick::HTTPServer#start: pid=18508 port=4567
+::1 - - [10/Nov/2025:16:23:26 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:23:59 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 16:24:37] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:160:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:16:24:37 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+[2025-11-10 16:32:49] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:160:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:16:32:49 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+::1 - - [10/Nov/2025:16:33:00 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+[2025-11-10 16:33:11] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:160:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:16:33:11 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+[2025-11-10 16:37:06] INFO  going to shutdown ...
+[2025-11-10 16:37:06] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 16:37:33] INFO  WEBrick 1.9.1
+[2025-11-10 16:37:33] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 16:37:33] INFO  WEBrick::HTTPServer#start: pid=5848 port=4567
+::1 - - [10/Nov/2025:16:37:36 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:38:12 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 16:47:38] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:170:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:16:47:38 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+::1 - - [10/Nov/2025:16:47:48 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:48:21 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:16:51:25 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:16:52:13 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:17:12:15 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:12:44 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:15:31] INFO  going to shutdown ...
+[2025-11-10 17:15:31] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:15:36] INFO  WEBrick 1.9.1
+[2025-11-10 17:15:36] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:15:36] INFO  WEBrick::HTTPServer#start: pid=27032 port=4567
+::1 - - [10/Nov/2025:17:15:40 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:15:57 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:19:11] INFO  going to shutdown ...
+[2025-11-10 17:19:11] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:20:03] INFO  WEBrick 1.9.1
+[2025-11-10 17:20:03] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:20:03] INFO  WEBrick::HTTPServer#start: pid=14212 port=4567
+::1 - - [10/Nov/2025:17:20:09 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:20:27 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:17:20:30 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+[2025-11-10 17:28:53] INFO  going to shutdown ...
+[2025-11-10 17:28:53] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:35:11] INFO  WEBrick 1.9.1
+[2025-11-10 17:35:11] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:35:11] INFO  WEBrick::HTTPServer#start: pid=28036 port=4567
+::1 - - [10/Nov/2025:17:35:15 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:35:38 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:36:21] INFO  going to shutdown ...
+[2025-11-10 17:36:21] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:36:31] INFO  WEBrick 1.9.1
+[2025-11-10 17:36:31] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:36:31] INFO  WEBrick::HTTPServer#start: pid=26240 port=4567
+::1 - - [10/Nov/2025:17:36:35 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:36:54 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:17:37:07 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:45:56] INFO  going to shutdown ...
+[2025-11-10 17:45:56] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:46:00] INFO  WEBrick 1.9.1
+[2025-11-10 17:46:00] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:46:00] INFO  WEBrick::HTTPServer#start: pid=21804 port=4567
+::1 - - [10/Nov/2025:17:46:08 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:46:34 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:46:46] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:160:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:17:46:46 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+::1 - - [10/Nov/2025:17:52:15 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:52:42 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 17:53:11] INFO  going to shutdown ...
+[2025-11-10 17:53:11] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 17:53:17] INFO  WEBrick 1.9.1
+[2025-11-10 17:53:17] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 17:53:17] INFO  WEBrick::HTTPServer#start: pid=29152 port=4567
+::1 - - [10/Nov/2025:17:53:21 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:53:40 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:17:56:37 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:17:56:41 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 505
+::1 - - [10/Nov/2025:17:57:17 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:04:52] INFO  going to shutdown ...
+[2025-11-10 18:04:52] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:07:07] INFO  WEBrick 1.9.1
+[2025-11-10 18:07:07] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:07:07] INFO  WEBrick::HTTPServer#start: pid=22764 port=4567
+::1 - - [10/Nov/2025:18:07:11 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:07:35 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:09:58] INFO  going to shutdown ...
+[2025-11-10 18:09:58] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:10:16] INFO  WEBrick 1.9.1
+[2025-11-10 18:10:16] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:10:16] INFO  WEBrick::HTTPServer#start: pid=26704 port=4567
+::1 - - [10/Nov/2025:18:10:33 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:18:13:08 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:18:14:02 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:16:36 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+[2025-11-10 18:17:01] INFO  going to shutdown ...
+[2025-11-10 18:17:01] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:17:17] INFO  WEBrick 1.9.1
+[2025-11-10 18:17:17] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:17:17] INFO  WEBrick::HTTPServer#start: pid=2988 port=4567
+::1 - - [10/Nov/2025:18:17:21 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:17:45 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:18:14] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:152:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:18:18:14 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+[2025-11-10 18:18:16] ERROR NameError: uninitialized constant JSON::ParseError
+	app.rb:152:in 'block in <main>'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/prochandler.rb:39:in 'WEBrick::HTTPServlet::ProcHandler#do_GET'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpservlet/abstract.rb:105:in 'WEBrick::HTTPServlet::AbstractServlet#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:140:in 'WEBrick::HTTPServer#service'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/httpserver.rb:96:in 'WEBrick::HTTPServer#run'
+	C:/Ruby34-x64/lib/ruby/gems/3.4.0/gems/webrick-1.9.1/lib/webrick/server.rb:310:in 'block in WEBrick::GenericServer#start_thread'
+::1 - - [10/Nov/2025:18:18:16 W. Europe Standard Time] "GET /users/register HTTP/1.1" 500 319
+[2025-11-10 18:20:00] INFO  going to shutdown ...
+[2025-11-10 18:20:00] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:20:05] INFO  WEBrick 1.9.1
+[2025-11-10 18:20:05] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:20:05] INFO  WEBrick::HTTPServer#start: pid=16864 port=4567
+::1 - - [10/Nov/2025:18:20:16 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:20:19 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:20:51 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:26:30] INFO  going to shutdown ...
+[2025-11-10 18:26:30] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:29:44] INFO  WEBrick 1.9.1
+[2025-11-10 18:29:44] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:29:44] INFO  WEBrick::HTTPServer#start: pid=28056 port=4567
+::1 - - [10/Nov/2025:18:30:18 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:30:36 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:32:56] INFO  going to shutdown ...
+[2025-11-10 18:32:56] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:33:05] INFO  WEBrick 1.9.1
+[2025-11-10 18:33:05] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:33:05] INFO  WEBrick::HTTPServer#start: pid=11184 port=4567
+::1 - - [10/Nov/2025:18:33:24 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:34:48] INFO  going to shutdown ...
+[2025-11-10 18:34:48] INFO  WEBrick::HTTPServer#start done.
+[2025-11-10 18:35:01] INFO  WEBrick 1.9.1
+[2025-11-10 18:35:01] INFO  ruby 3.4.7 (2025-10-08) [x64-mingw-ucrt]
+[2025-11-10 18:35:01] INFO  WEBrick::HTTPServer#start: pid=28680 port=4567
+::1 - - [10/Nov/2025:18:35:11 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:35:33 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:18:36:31 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+::1 - - [10/Nov/2025:18:38:14 W. Europe Standard Time] "GET /users/get HTTP/1.1" 200 405
+::1 - - [10/Nov/2025:18:38:47 W. Europe Standard Time] "OPTIONS /users/register HTTP/1.1" 200 0
+[2025-11-10 18:39:15] INFO  going to shutdown ...
+[2025-11-10 18:39:15] INFO  WEBrick::HTTPServer#start done.
