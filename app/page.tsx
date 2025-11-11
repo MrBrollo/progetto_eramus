@@ -1,25 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        const response = await fetch("http://localhost:4567//login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username, password }),
-        });
-
-        const data = await response.json();
-        alert(data.message);
+        setError("");
 
         //validazione dei campi obbligatori
         if (!username || !password) {
@@ -29,15 +21,30 @@ export default function LoginPage() {
 
         //Validazione password secondo linee guida Agid
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/;
-
         if (!passwordRegex.test(password)) {
             setError("La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale."
             );
             return;
         }
 
-        alert(`Login eseguito come ${username}`);
-        setError("");
+        try {
+            const res = await fetch("http://localhost:4567/users/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                localStorage.setItem("utente", JSON.stringify(data.utente));
+                router.push("/utenti");
+            } else {
+                setError(data.message || "Credenziali non valide");
+            }
+        } catch (err) {
+            setError("Errore di connessione al server Ruby.");
+        }
     };
 
     return (

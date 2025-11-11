@@ -41,6 +41,15 @@ post "/users/register" do
       return { success: false, message: "Username già esistente" }.to_json
     end
 
+    password_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/
+    unless user.password.match?(password_regex)
+      status 400
+      return {
+        sucess: false,
+        message: "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale."
+      }.to_json
+    end
+
     hashed_password = BCrypt::Password.create(user.password)
     conn.exec_params(
       "INSERT INTO utente (username, password, nome, cognome, data_nascita)

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 
 interface User {
@@ -16,6 +17,12 @@ export default function UserPage() {
     const [utenti, setUtenti] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
+    const router = useRouter();
+
+    useEffect(() => {
+        const user = localStorage.getItem("utente");
+        if (!user) router.push("/login");
+    }, [router]);
 
 
     useEffect(() => {
@@ -69,7 +76,6 @@ export default function UserPage() {
                 alert(res.data.message || "Errore durante la registrazione");
             }
         } catch (err: any) {
-            console.log(err);
             alert(err.response?.data?.message || "Errore di connessione al server Ruby");
         }
     };
