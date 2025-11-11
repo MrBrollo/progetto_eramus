@@ -1,7 +1,10 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    base64 (0.3.0)
     bcrypt (3.1.20)
+    jwt (3.1.2)
+      base64
     pg (1.6.2-x64-mingw-ucrt)
     webrick (1.9.1)
 
@@ -10,6 +13,7 @@ PLATFORMS
 
 DEPENDENCIES
   bcrypt
+  jwt
   pg
   webrick
 

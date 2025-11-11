@@ -2,6 +2,7 @@ require "sinatra"
 require "sinatra/cross_origin"
 require "pg"
 require "bcrypt"
+require "jwt"
 require_relative "db_connection"
 require_relative "user"
 
@@ -22,6 +23,21 @@ end
 
 options "*" do
   200
+end
+
+SECRET_KEY = ENV["JWT_SECRET"] || "key_casuale"
+
+def verify_token(request)
+  auth_header = request.env["HTTP_AUTHORIZATION"]
+  return nil unless auth_header && auth_header.start_with?("Bearer ")
+
+  token = auth_header.split(" ").last
+  begin
+    decoded = JWT.decode(token, SECRET_KEY, true, { algorithm: "HS256" })
+    return decoded[0]
+  rescue JWT::ExpiredSignature, JWT::DecodeError
+    nil
+  end
 end
 
 post "/users/register" do
@@ -45,7 +61,7 @@ post "/users/register" do
     unless user.password.match?(password_regex)
       status 400
       return {
-        sucess: false,
+        success: false,
         message: "La password deve contenere almeno 8 caratteri, una lettera maiuscola, una minuscola, un numero e un carattere speciale."
       }.to_json
     end
@@ -72,6 +88,7 @@ post "/users/register" do
 end
 
 post "/users/login" do
+
   begin
     data = JSON.parse(request.body.read)
     user = User.from_json(data)
@@ -80,10 +97,14 @@ post "/users/login" do
     result = conn.exec_params("SELECT * FROM utente WHERE username = $1 LIMIT 1", [user.username])
 
     if result.ntuples > 0 && BCrypt::Password.new(result[0]["password"]) == user.password
+      payload = { username: user.username, exp: Time.now.to_i + 3600 }
+      token = JWT.encode(payload, SECRET_KEY, "HS256")
+
       status 200
       {
         success: true,
-        message: "Login effettuato",
+        message: "Login effettuato con successo",
+        token: token,
         utente: {
           nome: result[0]["nome"],
           cognome: result[0]["cognome"],
@@ -103,6 +124,13 @@ post "/users/login" do
 end
 
 get "/users/get" do
+
+  payload = verify_token(request)
+  unless payload
+    status 401
+    return { success: false, message: "Token mancante o non valido "}.to_json
+  end
+
   begin
     conn = db_connection
     result = conn.exec("SELECT id, username, nome, cognome, data_nascita FROM utente ORDER BY id ASC")

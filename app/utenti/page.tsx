@@ -19,23 +19,33 @@ export default function UserPage() {
     const [error, setError] = useState<string>("");
     const router = useRouter();
 
-    useEffect(() => {
-        const user = localStorage.getItem("utente");
-        if (!user) router.push("/login");
-    }, [router]);
-
 
     useEffect(() => {
         const fetchUser = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                router.push("/login");
+                return;
+            }
+
             try {
-                const res = await axios.get("http://localhost:4567/users/get");
+                const res = await axios.get("http://localhost:4567/users/get", {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
                 if (res.data.success) {
                     setUtenti(res.data.utenti);
                 } else {
                     setError(res.data.message || "Errore nel caricamento utenti");
                 }
-            } catch (err) {
-                setError("Impossibile connettersi al server Ruby");
+            } catch (err: any) {
+                if (err.response?.status === 401) {
+                    localStorage.removeItem("token");
+                    router.push("/login");
+                } else {
+                    setError("Impossibile connettersi al server Ruby");
+                }
             } finally {
                 setLoading(false);
             }
@@ -49,6 +59,7 @@ export default function UserPage() {
 
         const form = event.currentTarget;
         const formData = new FormData(form);
+        const token = localStorage.getItem("token");
 
         const payload = {
             username: formData.get("username"),
@@ -60,7 +71,10 @@ export default function UserPage() {
 
         try {
             const res = await axios.post("http://localhost:4567/users/register", payload, {
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
             });
 
             if (res.data.success) {
@@ -68,7 +82,9 @@ export default function UserPage() {
                 form.reset();
 
                 //Aggiunge il nuovo utente alla tabella
-                const refreshRes = await axios.get("http://localhost:4567/users/get");
+                const refreshRes = await axios.get("http://localhost:4567/users/get", {
+                    headers: { "Authorization": `Bearer ${token}` },
+                });
                 if (refreshRes.data.success) {
                     setUtenti(refreshRes.data.utenti);
                 }
