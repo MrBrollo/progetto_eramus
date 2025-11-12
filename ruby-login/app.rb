@@ -5,6 +5,8 @@ require "bcrypt"
 require "jwt"
 require_relative "db_connection"
 require_relative "user"
+require_relative "prodotto"
+require_relative "inventario"
 
 set :port, 4567
 enable :cross_origin
