@@ -142,7 +142,7 @@ export default function UserPage() {
                                     <td>{u.username}</td>
                                     <td>{u.nome}</td>
                                     <td>{u.cognome}</td>
-                                    <td>{u.data_nascita}</td>
+                                    <td>{new Date(u.data_nascita).toLocaleDateString("it-IT")}</td>
                                 </tr>
                             ))}
                         </tbody>
