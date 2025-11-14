@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 interface Prodotto {
     id?: number;
@@ -12,18 +13,22 @@ interface Prodotto {
     tipo_prodotto_id: number;
 }
 
+type SortKey = "id" | "nome_oggetto" | "descrizione" | "data_inserimento" | "tipo_prodotto_id" | null;
+type SortOrder = "asc" | "desc";
+
 export default function InventarioPage() {
     const [inventario, setInventario] = useState<Prodotto[]>([]);
-    const [azione, setAzione] = useState("inserisci");
+    const [editId, setEditId] = useState<number | null>(null);
+    const [azione, setAzione] = useState<"inserisci" | "modifica">("inserisci");
+    const [idModifica, setIdModifica] = useState<number | "">("");
     const [formData, setFormData] = useState<Prodotto>({
         nome_oggetto: "",
         descrizione: "",
         tipo_prodotto_id: 1,
     });
-    const [idModifica, setIdModifica] = useState<number | "">("");
-    const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
     const router = useRouter();
+    const [sortKey, setSortKey] = useState<SortKey>(null);
+    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
     const tipiProdotto = [
         { id: 1, nome: "Buste" },
@@ -31,37 +36,55 @@ export default function InventarioPage() {
         { id: 3, nome: "Toner" },
     ];
 
-    useEffect(() => {
-        const fetchInventario = async () => {
-            const token = localStorage.getItem("token");
+    const sortData = (key: SortKey) => {
+        if (!key) return;
 
-            if (!token) {
-                router.push("/login");
-                return;
+        const newOrder = sortKey === key ? (sortOrder === "asc" ? "desc" : "asc") : "asc";
+
+        const sorted = [...inventario].sort((a, b) => {
+            let valA: any = a[key];
+            let valB: any = b[key];
+
+            if (key === "data_inserimento") {
+                valA = new Date(valA).getTime();
+                valB = new Date(valB).getTime();
+            } else if (key === "id") {
+                valA = Number(valA);
+                valB = Number(valB);
+            } else {
+                valA = valA?.toString().toLowerCase();
+                valB = valB?.toString().toLowerCase();
             }
 
-            try {
-                const res = await axios.get("http://localhost:4567/inventario", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+            if (valA < valB) return newOrder === "asc" ? -1 : 1;
+            if (valA > valB) return newOrder === "asc" ? 1 : -1;
+            return 0;
+        });
 
-                if (res.data.success) {
-                    setInventario(res.data.inventario);
-                } else {
-                    setError(res.data.message || "Errore nel caricamento dell'inventario");
-                }
-            } catch (err) {
-                setError("Impossibile connettersi al server Ruby");
-            }
-        };
+        setSortKey(key);
+        setSortOrder(newOrder);
+        setInventario(sorted);
+    };
 
-        fetchInventario();
-    }, [router]);
+    const getSortArrow = (key: SortKey) => {
+        if (sortKey !== key) return null;
+        return sortOrder === "asc" ? (
+            <svg className="icon icon-sm ms-1">
+                <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-arrow-up"></use>
+            </svg>) : (
+            <svg className="icon icon-sm ms-1">
+                <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-arrow-down"></use>
+            </svg>
+        );
+    };
 
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        setError("");
-        setSuccess("");
+    const getAriaSort = (key: SortKey) => {
+        if (sortKey !== key) return "none";
+        return sortOrder === "asc" ? "ascending" : "descending";
+    };
+
+    {/* --- CARICAMENTO INVENTARIO --- */ }
+    const fetchInventario = async () => {
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -70,45 +93,106 @@ export default function InventarioPage() {
         }
 
         try {
-            if (azione === "inserisci") {
+            const res = await axios.get("http://localhost:4567/inventario", {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (res.data.success) {
+                setInventario(res.data.inventario);
+            } else {
+                toast.error(res.data.message || "Errore nel caricamento dell'inventario");
+            }
+        } catch (err) {
+            toast.error("Impossibile connettersi al server Ruby");
+        }
+    };
+
+    useEffect(() => {
+        fetchInventario();
+    }, []);
+
+    {/* --- SUBMIT FORM --- */ }
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
+        try {
+            if (editId === null) {
+
                 await axios.post("http://localhost:4567/inventario", formData, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setSuccess("Prodotto inserito con successo");
-            } else if (azione === "modifica") {
-                if (!idModifica) return setError("Inserisci l'ID del prodotto da modificare");
-                await axios.put(`http://localhost:4567/inventario/${idModifica}`, formData, {
+                toast.success("Prodotto inserito con successo");
+            } else {
+                await axios.put(`http://localhost:4567/inventario/${editId}`, formData, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setSuccess("Prodotto modificato con successo");
-            } else if (azione === "elimina") {
-                if (!idModifica) return setError("Inserisci l'ID del prodotto da eliminare");
-                await axios.delete(`http://localhost:4567/inventario/${idModifica}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setSuccess("Prodotto eliminato con successo");
+                toast.success("Prodotto modificato con successo");
             }
 
-            //Ricarica l'inventario
-            const res = await axios.get("http://localhost:4567/inventario", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setInventario(res.data.inventario);
             setFormData({
                 nome_oggetto: "",
                 descrizione: "",
                 tipo_prodotto_id: 1
             });
-            setIdModifica("");
+            setEditId(null);
+
+            fetchInventario();
+
         } catch (err: any) {
-            setError(err.response?.data?.message || "Errore durante l'operazione");
+            toast.error(err.response?.data?.message || "Errore durante l'operazione")
         }
+    };
+
+    {/* --- FUNZIONE DI ELIMINAZIONE PRODOTTO --- */ }
+    const handleDelete = async (id: number) => {
+        const token = localStorage.getItem("token");
+        if (!token) return router.push("/login");
+
+        if (!confirm("Sei sicuro di voler eliminare questo prodotto?")) return;
+
+        try {
+            await axios.delete(`http://localhost:4567/inventario/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            toast.success("Prodotto eliminato con successo");
+            fetchInventario();
+        } catch (err: any) {
+            toast.error(err.response?.data?.message || "Errore durante l'eliminazione");
+        }
+    };
+
+    {/* --- FUNZIONE DI MODIFICA PRODOTTO ---*/ }
+    const handleEdit = (prodotto: Prodotto) => {
+        if (azione === "modifica" && idModifica === prodotto.id) {
+            setAzione("inserisci");
+            setIdModifica("");
+            setFormData({
+                nome_oggetto: "",
+                descrizione: "",
+                tipo_prodotto_id: 1,
+            });
+            return;
+        }
+
+        setAzione("modifica");
+        setIdModifica(prodotto.id || "");
+        setFormData({
+            nome_oggetto: prodotto.nome_oggetto,
+            descrizione: prodotto.descrizione,
+            tipo_prodotto_id: prodotto.tipo_prodotto_id,
+        });
     };
 
     return (
@@ -125,105 +209,123 @@ export default function InventarioPage() {
                 }}>
                 Gestione Inventario</h1>
 
-            {/* --- SELEZIONE AZIONE --- */}
-            <div className="mb-4">
-                <label className="form-label fw-bold">Seleziona azione:</label>
-                <select
-                    className="form-select"
-                    value={azione}
-                    onChange={(event) => setAzione(event.target.value)}
-                >
-                    <option value="inserisci">Inserisci prodotto</option>
-                    <option value="modifica">Modifica prodotto</option>
-                    <option value="elimina">Elimina prodotto</option>
-                </select>
-            </div>
-
-            {/* --- FORM DINAMICO --- */}
-            <form onSubmit={handleSubmit} className="mb-5 border rounded p-3 bg-light">
-                {(azione === "modifica" || azione === "elimina") && (
-                    <div className="mb-3">
-                        <label className="form-label">ID Prodotto</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            value={idModifica}
-                            onChange={(event) => setIdModifica(Number(event.target.value))}
-                            required
-                        />
-                    </div>
-                )}
-
-                {azione !== "elimina" && (
-                    <>
-                        <div className="mb-3">
-                            <label className="form-label">Nome Oggetto</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={formData.nome_oggetto}
-                                onChange={(event) =>
-                                    setFormData({ ...formData, nome_oggetto: event.target.value })
-                                }
-                                required
-                            />
-                        </div>
-
-                        <div className="mb-3">
-                            <label className="form-label">Descrizione</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                value={formData.descrizione}
-                                onChange={(event) =>
-                                    setFormData({ ...formData, descrizione: event.target.value })
-                                }
-                            />
-                        </div>
-
-                        <div className="mb-3">
-                            <label className="form-label">Tipo Prodotto</label>
-                            <select
-                                className="form-select"
-                                value={formData.tipo_prodotto_id}
-                                onChange={(event) =>
-                                    setFormData({ ...formData, tipo_prodotto_id: Number(event.target.value) })
-                                }
-                            >
-                                {tipiProdotto.map((tipo) => (
-                                    <option key={tipo.id} value={tipo.id}>
-                                        {tipo.nome}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </>
-                )}
-
-                <button type="submit" className="btn btn-primary">
-                    {azione === "inserisci"
-                        ? "Inserisci"
-                        : azione === "modifica"
-                            ? "Aggiorna"
-                            : "Elimina"}
-                </button>
-            </form>
-
-            {/* --- MESSAGGI DI ERRORE/SUCCESSO --- */}
-            {error && <div className="alert alert-danger">{error}</div>}
-            {success && <div className="alert alert-success">{success}</div>}
-
             {/* --- TABELLA INVENTARIO --- */}
             <table className="table table-striped table-hover">
                 <thead className="table-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Nome Oggetto</th>
-                        <th>Descrizione</th>
-                        <th>Data Inserimento</th>
-                        <th>Tipo Prodotto</th>
+                        <th scope="col">
+                            <button
+                                className="btn btn-link p-0 text-decoration-none"
+                                onClick={() => sortData("id")}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        sortData("id");
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-sort={getAriaSort("id")}
+                                aria-label={
+                                    sortKey === "id"
+                                        ? `Ordina per id, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                        : "Ordina per id"
+                                }
+                            >
+                                ID {getSortArrow("id")}
+                            </button>
+                        </th>
+
+                        <th scope="col">
+                            <button
+                                className="btn btn-link p-0 text-decoration-none"
+                                onClick={() => sortData("nome_oggetto")}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        sortData("nome_oggetto");
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-sort={getAriaSort("nome_oggetto")}
+                                aria-label={
+                                    sortKey === "nome_oggetto"
+                                        ? `Ordina per nome oggetto, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                        : "Ordina per nome oggetto"
+                                }
+                            >
+                                Nome Oggetto {getSortArrow("nome_oggetto")}
+                            </button>
+                        </th>
+
+                        <th scope="col">
+                            <button
+                                className="btn btn-link p-0 text-decoration-none"
+                                onClick={() => sortData("descrizione")}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        sortData("descrizione");
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-sort={getAriaSort("descrizione")}
+                                aria-label={
+                                    sortKey === "descrizione"
+                                        ? `Ordina per descrizione, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                        : "Ordina per descrizione"
+                                }
+                            >
+                                Descrizione {getSortArrow("descrizione")}
+                            </button>
+                        </th>
+
+                        <th scope="col">
+                            <button
+                                className="btn btn-link p-0 text-decoration-none"
+                                onClick={() => sortData("data_inserimento")}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        sortData("data_inserimento");
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-sort={getAriaSort("data_inserimento")}
+                                aria-label={
+                                    sortKey === "data_inserimento"
+                                        ? `Ordina per data inserimento, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                        : "Ordina per data inserimento"
+                                }
+                            >
+                                Data Inserimento {getSortArrow("data_inserimento")}
+                            </button>
+                        </th>
+
+                        <th scope="col">
+                            <button
+                                className="btn btn-link p-0 text-decoration-none"
+                                onClick={() => sortData("tipo_prodotto_id")}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" || e.key === " ") {
+                                        e.preventDefault();
+                                        sortData("tipo_prodotto_id");
+                                    }
+                                }}
+                                tabIndex={0}
+                                aria-sort={getAriaSort("tipo_prodotto_id")}
+                                aria-label={
+                                    sortKey === "tipo_prodotto_id"
+                                        ? `Ordina per tipo prodotto, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                        : "Ordina per tipo prodotto"
+                                }
+                            >
+                                Tipo Prodotto {getSortArrow("tipo_prodotto_id")}
+                            </button>
+                        </th>
+                        <th scope="col"></th>
                     </tr>
                 </thead>
+
                 <tbody>
                     {inventario.length > 0 ? (
                         inventario.map((item: any) => (
@@ -233,17 +335,94 @@ export default function InventarioPage() {
                                 <td>{item.descrizione}</td>
                                 <td>{new Date(item.data_inserimento).toLocaleDateString("it-IT")}</td>
                                 <td>{item.tipo_prodotto}</td>
+                                <td className="text-end">
+
+                                    {/* --- PULSANTI MODIFICA/ELIMINA --- */}
+                                    <button
+                                        className="btn btn-sm me-2"
+                                        onClick={() => handleEdit(item)}
+                                        title="Modifica"
+                                    >
+                                        <svg className="icon icon-sm">
+                                            <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-pencil"></use>
+                                        </svg>
+                                    </button>
+
+                                    <button
+                                        className="btn btn-sm"
+                                        onClick={() => handleDelete(item.id)}
+                                        title="Elimina"
+                                    >
+                                        <svg className="icon icon-sm">
+                                            <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-delete"></use>
+                                        </svg>
+                                    </button>
+                                </td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={5} className="text-center">
-                                Nessun prodotto presente in inventario.
+                            <td colSpan={6} className="text-center">
+                                Nessun prodotto in inventario.
                             </td>
                         </tr>
                     )}
                 </tbody>
             </table>
-        </div>
+
+            {/* --- FORM INSERIMENTO / MODIFICA --- */}
+            <form onSubmit={handleSubmit} className="mb-5 border rounded p-3 bg-light">
+
+                <h5 className="fw-bold text-center mb-3"
+                    style={{ color: "#1C2024" }}>
+                    {azione === "modifica" ? "Modifica prodotto" : "Inserisci nuovo prodotto"}
+                </h5>
+
+                <div className="mb-3">
+                    <label className="form-label">Nome Oggetto</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={formData.nome_oggetto}
+                        onChange={(e) => setFormData({ ...formData, nome_oggetto: e.target.value })}
+                        required
+                    />
+                </div>
+
+
+                <div className="mb-3">
+                    <label className="form-label">Descrizione</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={formData.descrizione}
+                        onChange={(e) =>
+                            setFormData({ ...formData, descrizione: e.target.value })
+                        }
+                    />
+                </div>
+
+                <div className="mb-3">
+                    <label className="form-label">Tipo Prodotto</label>
+                    <select
+                        className="form-select"
+                        value={formData.tipo_prodotto_id}
+                        onChange={(e) =>
+                            setFormData({ ...formData, tipo_prodotto_id: Number(e.target.value) })
+                        }
+                    >
+                        {tipiProdotto.map((tipo) => (
+                            <option key={tipo.id} value={tipo.id}>
+                                {tipo.nome}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <button type="submit" className="btn btn-primary w-100">
+                    {azione === "modifica" ? "Aggiorna" : "Inserisci"}
+                </button>
+            </form>
+        </div >
     );
-}                            
+}

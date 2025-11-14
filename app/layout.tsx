@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "bootstrap-italia/dist/css/bootstrap-italia.min.css";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import ToastProvider from "./components/ToastProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="it">
       <body>
         <Navbar />
+        <ToastProvider />
         <main className="container mt-4">{children}</main>
       </body>
     </html>

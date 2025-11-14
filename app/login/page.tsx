@@ -2,27 +2,26 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError("");
 
         //validazione dei campi obbligatori
         if (!username || !password) {
-            setError("Compilare tutti i campi obbligatori.");
+            toast.error("Compilare tutti i campi obbligatori.");
             return;
         }
 
         //Validazione password secondo linee guida Agid
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/;
         if (!passwordRegex.test(password)) {
-            setError("La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale."
+            toast.error("La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale."
             );
             return;
         }
@@ -43,10 +42,10 @@ export default function LoginPage() {
                 localStorage.setItem("token", data.token);
                 router.push("/utenti");
             } else {
-                setError(data.message || "Credenziali non valide");
+                toast.error(data.message || "Credenziali non valide");
             }
         } catch (err) {
-            setError("Errore di connessione al server Ruby.");
+            toast.error("Errore di connessione al server Ruby.");
         }
     };
 
@@ -59,11 +58,6 @@ export default function LoginPage() {
                             <div className="card-body p-4">
                                 <h1 className="h4 text-center mb-4 text-dark fw-bold">Login</h1>
 
-                                {error && (
-                                    <div className="alert alert-danger" role="alert">
-                                        {error}
-                                    </div>
-                                )}
 
                                 <form onSubmit={handleSubmit} noValidate>
                                     <div className="mb-3">

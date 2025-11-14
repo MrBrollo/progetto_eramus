@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 interface User {
     id: number;
@@ -13,10 +14,14 @@ interface User {
     data_nascita: string;
 }
 
+type SortKey = "id" | "username" | "nome" | "cognome" | "data_nascita" | null;
+type SortOrder = "asc" | "desc";
+
 export default function UserPage() {
     const [utenti, setUtenti] = useState<User[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>("");
+    const [sortKey, setSortKey] = useState<SortKey>(null);
+    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const router = useRouter();
 
 
@@ -37,14 +42,14 @@ export default function UserPage() {
                 if (res.data.success) {
                     setUtenti(res.data.utenti);
                 } else {
-                    setError(res.data.message || "Errore nel caricamento utenti");
+                    toast.error(res.data.message || "Errore nel caricamento utenti");
                 }
             } catch (err: any) {
                 if (err.response?.status === 401) {
                     localStorage.removeItem("token");
                     router.push("/login");
                 } else {
-                    setError("Impossibile connettersi al server Ruby");
+                    toast.error("Impossibile connettersi al server Ruby");
                 }
             } finally {
                 setLoading(false);
@@ -54,6 +59,55 @@ export default function UserPage() {
         fetchUser();
     }, []);
 
+    {/* --- ORDINE DEI CAMPI TABELLA --- */ }
+    const sortData = (key: SortKey) => {
+        if (!key) return;
+
+        const newOrder = sortKey === key ? (sortOrder === "asc" ? "desc" : "asc") : "asc";
+
+        const sorted = [...utenti].sort((a, b) => {
+            let valA: any = a[key];
+            let valB: any = b[key];
+
+            if (key === "data_nascita") {
+                valA = new Date(valA).getTime();
+                valB = new Date(valB).getTime();
+            } else if (key === "id") {
+                valA = Number(valA);
+                valB = Number(valB);
+            } else {
+                valA = valA?.toString().toLowerCase();
+                valB = valB?.toString().toLowerCase();
+            }
+
+            if (valA < valB) return newOrder === "asc" ? -1 : 1;
+            if (valA > valB) return newOrder === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        setSortKey(key);
+        setSortOrder(newOrder);
+        setUtenti(sorted);
+    };
+
+    const getSortArrow = (key: SortKey) => {
+        if (sortKey !== key) return null;
+        return sortOrder === "asc" ? (
+            <svg className="icon icon-sm ms-1">
+                <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-arrow-up"></use>
+            </svg>) : (
+            <svg className="icon icon-sm ms-1">
+                <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-arrow-down"></use>
+            </svg>
+        );
+    };
+
+    const getAriaSort = (key: SortKey) => {
+        if (sortKey !== key) return "none";
+        return sortOrder === "asc" ? "ascending" : "descending";
+    };
+
+    {/* --- AGGIUNGI NUOVO UTENTE --- */ }
     const handleCreateUser = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -78,7 +132,7 @@ export default function UserPage() {
             });
 
             if (res.data.success) {
-                alert("Utente aggiunto con successo!");
+                toast.success("Utente aggiunto con successo!");
                 form.reset();
 
                 //Aggiunge il nuovo utente alla tabella
@@ -89,13 +143,14 @@ export default function UserPage() {
                     setUtenti(refreshRes.data.utenti);
                 }
             } else {
-                alert(res.data.message || "Errore durante la registrazione");
+                toast.error(res.data.message || "Errore durante la registrazione");
             }
         } catch (err: any) {
-            alert(err.response?.data?.message || "Errore di connessione al server Ruby");
+            toast.error(err.response?.data?.message || "Errore di connessione al server Ruby");
         }
     };
 
+    {/* --- TABELLA GESTIONE UTENTI --- */ }
     return (
         <div className="container my-5 p-4 rounded shadow-sm"
             style={{
@@ -117,22 +172,120 @@ export default function UserPage() {
                 </div>
             )}
 
-            {error && (
-                <div className="alert alert-danger" role="alert">
-                    <p className="text-center text-danger">{error}</p>
-                </div>
-            )}
-
-            {!loading && !error && utenti.length > 0 && (
+            {!loading && utenti.length > 0 && (
                 <div className="table-responsive">
                     <table className="table table-striped table-hover">
                         <thead className="table-light">
                             <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Username</th>
-                                <th scope="col">Nome</th>
-                                <th scope="col">Cognome</th>
-                                <th scope="col">Data di Nascita</th>
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("id")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("id");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("id")}
+                                        aria-label={
+                                            sortKey === "id"
+                                                ? `Ordina per id, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per id"
+                                        }
+                                    >
+                                        ID {getSortArrow("id")}
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("username")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("username");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("username")}
+                                        aria-label={
+                                            sortKey === "username"
+                                                ? `Ordina per username, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per username"
+                                        }
+                                    >
+                                        Username {getSortArrow("username")}
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("nome")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("nome");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("nome")}
+                                        aria-label={
+                                            sortKey === "nome"
+                                                ? `Ordina per nome, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per nome"
+                                        }
+                                    >
+                                        Nome {getSortArrow("nome")}
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("cognome")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("cognome");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("cognome")}
+                                        aria-label={
+                                            sortKey === "cognome"
+                                                ? `Ordina per cognome, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per cognome"
+                                        }
+                                    >
+                                        Cognome {getSortArrow("cognome")}
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("data_nascita")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("data_nascita");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("data_nascita")}
+                                        aria-label={
+                                            sortKey === "data_nascita"
+                                                ? `Ordina per data di nascita, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per data di nascita"
+                                        }
+                                    >
+                                        Data di nascita {getSortArrow("data_nascita")}
+                                    </button>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -150,12 +303,13 @@ export default function UserPage() {
                 </div>
             )}
 
-            {!loading && !error && utenti.length === 0 && (
+            {!loading && utenti.length === 0 && (
                 <div className="alert alert-warning" role="alert">
                     Nessun utente trovato.
                 </div>
             )}
 
+            {/* --- FORM CREAZIONE UTENTE --- */}
             <div className="mt-5">
                 <h5 className="text-center fw-bold mb-4" style={{ color: "#1C2024" }}>Aggiungi un nuovo utente</h5>
                 <form id="form-create-user" className="row g-3" onSubmit={handleCreateUser}>
