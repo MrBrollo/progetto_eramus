@@ -20,7 +20,6 @@ export default function InventarioPage() {
     const [inventario, setInventario] = useState<Prodotto[]>([]);
     const [editId, setEditId] = useState<number | null>(null);
     const [azione, setAzione] = useState<"inserisci" | "modifica">("inserisci");
-    const [idModifica, setIdModifica] = useState<number | "">("");
     const [formData, setFormData] = useState<Prodotto>({
         nome_oggetto: "",
         descrizione: "",
@@ -48,7 +47,7 @@ export default function InventarioPage() {
             if (key === "data_inserimento") {
                 valA = new Date(valA).getTime();
                 valB = new Date(valB).getTime();
-            } else if (key === "id") {
+            } else if (key === "id" || key === "tipo_prodotto_id") {
                 valA = Number(valA);
                 valB = Number(valB);
             } else {
@@ -175,9 +174,9 @@ export default function InventarioPage() {
 
     {/* --- FUNZIONE DI MODIFICA PRODOTTO ---*/ }
     const handleEdit = (prodotto: Prodotto) => {
-        if (azione === "modifica" && idModifica === prodotto.id) {
+        if (azione === "modifica" && editId === prodotto.id) {
             setAzione("inserisci");
-            setIdModifica("");
+            setEditId(null);
             setFormData({
                 nome_oggetto: "",
                 descrizione: "",
@@ -187,11 +186,11 @@ export default function InventarioPage() {
         }
 
         setAzione("modifica");
-        setIdModifica(prodotto.id || "");
+        setEditId(prodotto.id || null);
         setFormData({
             nome_oggetto: prodotto.nome_oggetto,
             descrizione: prodotto.descrizione,
-            tipo_prodotto_id: prodotto.tipo_prodotto_id,
+            tipo_prodotto_id: Number(prodotto.tipo_prodotto_id) || 1,
         });
     };
 
@@ -406,7 +405,7 @@ export default function InventarioPage() {
                     <label className="form-label">Tipo Prodotto</label>
                     <select
                         className="form-select"
-                        value={formData.tipo_prodotto_id}
+                        value={String(formData.tipo_prodotto_id ?? "")}
                         onChange={(e) =>
                             setFormData({ ...formData, tipo_prodotto_id: Number(e.target.value) })
                         }
