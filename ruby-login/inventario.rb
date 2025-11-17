@@ -28,12 +28,24 @@ get "/inventario" do
     begin
         conn = db_connection
 
-        result = conn.exec("
+        # Parametri paginazione
+        page = (params["page"] || 1).to_i
+        per_page = 10
+        offset = (page - 1) * per_page
+
+        # Conteggio totale
+        total_count_result = conn.exec("SELECT COUNT(*) FROM inventario")
+        total_count = total_count_result[0]["count"].to_i
+        total_pages = (total_count.to_f / per_page).ceil
+
+        # Query paginata
+        result = conn.exec_params("
         SELECT i.id, i.nome_oggetto, i.descrizione, i.data_inserimento, t.tipo
         FROM inventario i
         JOIN tipo_prodotto t ON i.tipo_prodotto_id = t.id
         ORDER BY i.id ASC
-        ")
+        LIMIT $1 OFFSET $2
+        ", [per_page, offset])
 
         inventario = result.map do |r|
             {
@@ -45,7 +57,13 @@ get "/inventario" do
             }
         end
 
-        { success: true, inventario: inventario }.to_json
+        {
+            success: true,
+            inventario: inventario,
+            page: page,
+            per_page: per_page,
+            total_pages: total_pages
+        }.to_json
 
     rescue PG::Error => e
         status 500

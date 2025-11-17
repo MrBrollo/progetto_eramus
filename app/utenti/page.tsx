@@ -22,6 +22,8 @@ export default function UserPage() {
     const [loading, setLoading] = useState<boolean>(true);
     const [sortKey, setSortKey] = useState<SortKey>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const router = useRouter();
 
 
@@ -35,12 +37,13 @@ export default function UserPage() {
             }
 
             try {
-                const res = await axios.get("http://localhost:4567/users/get", {
+                const res = await axios.get(`http://localhost:4567/users/get?page=${page}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
                 if (res.data.success) {
                     setUtenti(res.data.utenti);
+                    setTotalPages(res.data.total_pages);
                 } else {
                     toast.error(res.data.message || "Errore nel caricamento utenti");
                 }
@@ -57,7 +60,7 @@ export default function UserPage() {
         };
 
         fetchUser();
-    }, []);
+    }, [page]);
 
     {/* --- ORDINE DEI CAMPI TABELLA --- */ }
     const sortData = (key: SortKey) => {
@@ -136,7 +139,7 @@ export default function UserPage() {
                 form.reset();
 
                 //Aggiunge il nuovo utente alla tabella
-                const refreshRes = await axios.get("http://localhost:4567/users/get", {
+                const refreshRes = await axios.get(`http://localhost:4567/users/get?page=${page}`, {
                     headers: { "Authorization": `Bearer ${token}` },
                 });
                 if (refreshRes.data.success) {
@@ -303,6 +306,28 @@ export default function UserPage() {
                 </div>
             )}
 
+            <div className="d-flex justify-content-between align-items-center mt-3">
+                <button
+                    className="btn btn-primary"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => p - 1)}
+                >
+                    Pagina precedente
+                </button>
+
+                <span className="fw-bold text-dark">
+                    Pagina {page} di {totalPages}
+                </span>
+
+                <button
+                    className="btn btn-primary"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => p + 1)}
+                >
+                    Pagina successiva
+                </button>
+            </div>
+
             {!loading && utenti.length === 0 && (
                 <div className="alert alert-warning" role="alert">
                     Nessun utente trovato.
@@ -311,7 +336,7 @@ export default function UserPage() {
 
             {/* --- FORM CREAZIONE UTENTE --- */}
             <div className="mt-5">
-                <h5 className="text-center fw-bold mb-4" style={{ color: "#1C2024" }}>Aggiungi un nuovo utente</h5>
+                <h2 className="text-center fw-bold mb-4" style={{ color: "#1C2024" }}>Aggiungi un nuovo utente</h2>
                 <form id="form-create-user" className="row g-3" onSubmit={handleCreateUser}>
                     <div className="col-md-6">
                         <div className="">

@@ -135,7 +135,24 @@ get "/users/get" do
 
   begin
     conn = db_connection
-    result = conn.exec("SELECT id, username, nome, cognome, data_nascita FROM utente ORDER BY id ASC")
+    # ---- PAGINAZIONE ----
+    page = (params["page"] || 1).to_i
+    per_page = 10
+    offset = (page - 1) * per_page
+
+    # Conta totale utenti
+    total_result = conn.exec("SELECT COUNT(*) FROM utente")
+    total_count = total_result[0]["count"].to_i
+    total_pages = (total_count / per_page.to_f).ceil
+
+    # Query paginata
+    result = conn.exec_params(
+      "SELECT id, username, nome, cognome, data_nascita
+       FROM utente
+       ORDER BY id ASC
+       LIMIT $1 OFFSET $2",
+      [per_page, offset]
+    )
 
     utenti = result.map do |r|
       {
@@ -147,7 +164,15 @@ get "/users/get" do
       }
     end
 
-    { success: true, utenti: utenti }.to_json
+     {
+      success: true,
+      page: page,
+      per_page: per_page,
+      total_pages: total_pages,
+      total_items: total_count,
+      utenti: utenti
+    }.to_json
+    
   rescue PG::Error => e
     status 500
     { success: false, message: "Errore database: #{e.message}" }.to_json

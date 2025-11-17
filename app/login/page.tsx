@@ -79,7 +79,7 @@ export default function LoginPage() {
                                         </small>
                                     </div>
 
-                                    <div className=" mb-3">
+                                    <div className="mb-3">
                                         <label htmlFor="password" className="form-label fw-semibold">
                                             Password <span className="text-danger">*</span>
                                         </label>
@@ -108,7 +108,7 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        <p className="text-center mt-3 text-muted small">
+                        <p className="text-center mt-3 small" style={{ color: "#404A59" }}>
                             Accesso riservato - conforme alle linee guida Agid.
                         </p>
                     </div>

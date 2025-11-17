@@ -28,6 +28,8 @@ export default function InventarioPage() {
     const router = useRouter();
     const [sortKey, setSortKey] = useState<SortKey>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const tipiProdotto = [
         { id: 1, nome: "Buste" },
@@ -83,7 +85,7 @@ export default function InventarioPage() {
     };
 
     {/* --- CARICAMENTO INVENTARIO --- */ }
-    const fetchInventario = async () => {
+    const fetchInventario = async (page = 1) => {
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -92,12 +94,14 @@ export default function InventarioPage() {
         }
 
         try {
-            const res = await axios.get("http://localhost:4567/inventario", {
+            const res = await axios.get(`http://localhost:4567/inventario?page=${page}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.data.success) {
                 setInventario(res.data.inventario);
+                setCurrentPage(res.data.page);
+                setTotalPages(res.data.total_pages);
             } else {
                 toast.error(res.data.message || "Errore nel caricamento dell'inventario");
             }
@@ -106,9 +110,15 @@ export default function InventarioPage() {
         }
     };
 
+    const goToPage = (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
     useEffect(() => {
-        fetchInventario();
-    }, []);
+        fetchInventario(currentPage);
+    }, [currentPage]);
 
     {/* --- SUBMIT FORM --- */ }
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -321,7 +331,9 @@ export default function InventarioPage() {
                                 Tipo Prodotto {getSortArrow("tipo_prodotto_id")}
                             </button>
                         </th>
-                        <th scope="col"></th>
+                        <th scope="col">
+                            <span className="visually-hidden">Azioni</span>
+                        </th>
                     </tr>
                 </thead>
 
@@ -369,19 +381,58 @@ export default function InventarioPage() {
                 </tbody>
             </table>
 
+            <div className="d-flex justify-content-center align-items-center my-3">
+
+                {/* PREVIOUS */}
+                <button
+                    className="btn btn-sm btn-primary mx-1"
+                    disabled={currentPage === 1}
+                    onClick={() => goToPage(currentPage - 1)}
+                >
+                    Pagina precedente
+                </button>
+
+                {/* NUMBERS */}
+                {[...Array(totalPages)].map((_, i) => {
+                    const page = i + 1;
+                    return (
+                        <button
+                            key={page}
+                            className={`btn btn-sm mx-1 ${currentPage === page
+                                ? "btn-primary"
+                                : "btn-outline-secondary"
+                                }`}
+                            onClick={() => goToPage(page)}
+                        >
+                            {page}
+                        </button>
+                    );
+                })}
+
+                {/* NEXT */}
+                <button
+                    className="btn btn-sm btn-primary mx-1"
+                    disabled={currentPage === totalPages}
+                    onClick={() => goToPage(currentPage + 1)}
+                >
+                    Pagina successiva
+                </button>
+            </div>
+
             {/* --- FORM INSERIMENTO / MODIFICA --- */}
             <form onSubmit={handleSubmit} className="mb-5 border rounded p-3 bg-light">
 
-                <h5 className="fw-bold text-center mb-3"
+                <h2 className="fw-bold text-center mb-3"
                     style={{ color: "#1C2024" }}>
                     {azione === "modifica" ? "Modifica prodotto" : "Inserisci nuovo prodotto"}
-                </h5>
+                </h2>
 
                 <div className="mb-3">
-                    <label className="form-label">Nome Oggetto</label>
+                    <label htmlFor="nome_oggetto" className="form-label">Nome Oggetto</label>
                     <input
                         type="text"
                         className="form-control"
+                        id="nome_oggetto"
                         value={formData.nome_oggetto}
                         onChange={(e) => setFormData({ ...formData, nome_oggetto: e.target.value })}
                         required
@@ -390,10 +441,11 @@ export default function InventarioPage() {
 
 
                 <div className="mb-3">
-                    <label className="form-label">Descrizione</label>
+                    <label htmlFor="descrizione" className="form-label">Descrizione</label>
                     <input
                         type="text"
                         className="form-control"
+                        id="descrizione"
                         value={formData.descrizione}
                         onChange={(e) =>
                             setFormData({ ...formData, descrizione: e.target.value })
@@ -402,10 +454,11 @@ export default function InventarioPage() {
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label">Tipo Prodotto</label>
+                    <label htmlFor="tipo_prodotto" className="form-label">Tipo Prodotto</label>
                     <select
                         className="form-select"
                         value={String(formData.tipo_prodotto_id ?? "")}
+                        id="tipo_prodotto"
                         onChange={(e) =>
                             setFormData({ ...formData, tipo_prodotto_id: Number(e.target.value) })
                         }
