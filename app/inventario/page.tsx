@@ -404,7 +404,7 @@ export default function InventarioPage() {
 
 
             {/* PAGINAZIONE */}
-            <div className="d-flex justify-content-center align-items-center my-3">
+            <div className="d-flex justify-content-between align-items-center my-3 gap-2">
 
                 {/* PRECEDENTE */}
                 <button
