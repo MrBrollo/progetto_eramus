@@ -34,6 +34,9 @@ export default function Navbar() {
                                 href="/utenti"
                                 onClick={() => setIsOpen(false)}
                             >
+                                <svg className="icon icon-sm ms-1">
+                                    <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-user"></use>
+                                </svg>
                                 Gestione Utenti
                             </Link>
                         </li>
@@ -43,6 +46,9 @@ export default function Navbar() {
                                 href="/inventario"
                                 onClick={() => setIsOpen(false)}
                             >
+                                <svg className="icon icon-sm ms-1">
+                                    <use xlinkHref="/bootstrap-italia/svg/sprites.svg#it-tool"></use>
+                                </svg>
                                 Gestione Inventario
                             </Link>
                         </li>
