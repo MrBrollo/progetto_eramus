@@ -84,6 +84,27 @@ export default function InventarioPage() {
         return sortOrder === "asc" ? "ascending" : "descending";
     };
 
+    //Funzione per generare i numeri di pagina da visualizzare
+    const getPageNumbers = () => {
+        const pages: number[] = [];
+
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage === 1) {
+                pages.push(1, 2, 3);
+            } else if (currentPage === totalPages) {
+                pages.push(totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(currentPage - 1, currentPage, currentPage + 1);
+            }
+        }
+
+        return pages;
+    }
+
     {/* --- CARICAMENTO INVENTARIO --- */ }
     const fetchInventario = async (page = 1) => {
         const token = localStorage.getItem("token");
@@ -381,39 +402,43 @@ export default function InventarioPage() {
                 </tbody>
             </table>
 
+
+            {/* PAGINAZIONE */}
             <div className="d-flex justify-content-center align-items-center my-3">
 
-                {/* PREVIOUS */}
+                {/* PRECEDENTE */}
                 <button
-                    className="btn btn-sm btn-primary mx-1"
+                    className="btn btn-sm btn-primary"
                     disabled={currentPage === 1}
                     onClick={() => goToPage(currentPage - 1)}
+                    aria-label="Pagina precedente"
                 >
                     Pagina precedente
                 </button>
 
-                {/* NUMBERS */}
-                {[...Array(totalPages)].map((_, i) => {
-                    const page = i + 1;
-                    return (
+                {/* NUMERI */}
+                <div className="d-flex gap-2">
+                    {getPageNumbers().map((page) => (
                         <button
                             key={page}
-                            className={`btn btn-sm mx-1 ${currentPage === page
+                            className={`btn btn-sm ${currentPage === page
                                 ? "btn-primary"
-                                : "btn-outline-secondary"
+                                : "btn-outline-primary"
                                 }`}
                             onClick={() => goToPage(page)}
+                            aria-label={currentPage === page ? "page" : undefined}
                         >
                             {page}
                         </button>
-                    );
-                })}
+                    ))}
+                </div>
 
-                {/* NEXT */}
+                {/* SUCCESSIVO */}
                 <button
-                    className="btn btn-sm btn-primary mx-1"
+                    className="btn btn-sm btn-primary"
                     disabled={currentPage === totalPages}
                     onClick={() => goToPage(currentPage + 1)}
+                    aria-label="Pagina successiva"
                 >
                     Pagina successiva
                 </button>

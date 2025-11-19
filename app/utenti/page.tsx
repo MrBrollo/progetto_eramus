@@ -22,45 +22,73 @@ export default function UserPage() {
     const [loading, setLoading] = useState<boolean>(true);
     const [sortKey, setSortKey] = useState<SortKey>(null);
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-    const [page, setPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const router = useRouter();
 
+    const getPageNumbers = () => {
+        const pages: number[] = [];
+
+        if (totalPages <= 3) {
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            if (currentPage === 1) {
+                pages.push(1, 2, 3);
+            } else if (currentPage === totalPages) {
+                pages.push(totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(currentPage - 1, currentPage, currentPage + 1);
+            }
+        }
+
+        return pages;
+    }
+
+
+
+    const fetchUser = async (page = 1) => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
+        try {
+            const res = await axios.get(`http://localhost:4567/users/get?page=${page}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (res.data.success) {
+                setUtenti(res.data.utenti);
+                setCurrentPage(res.data.page || page);
+                setTotalPages(res.data.total_pages);
+            } else {
+                toast.error(res.data.message || "Errore nel caricamento utenti");
+            }
+        } catch (err: any) {
+            if (err.response?.status === 401) {
+                localStorage.removeItem("token");
+                router.push("/login");
+            } else {
+                toast.error("Impossibile connettersi al server Ruby");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const goToPage = (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
 
     useEffect(() => {
-        const fetchUser = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
-            try {
-                const res = await axios.get(`http://localhost:4567/users/get?page=${page}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (res.data.success) {
-                    setUtenti(res.data.utenti);
-                    setTotalPages(res.data.total_pages);
-                } else {
-                    toast.error(res.data.message || "Errore nel caricamento utenti");
-                }
-            } catch (err: any) {
-                if (err.response?.status === 401) {
-                    localStorage.removeItem("token");
-                    router.push("/login");
-                } else {
-                    toast.error("Impossibile connettersi al server Ruby");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, [page]);
+        fetchUser(currentPage);
+    }, [currentPage]);
 
     {/* --- ORDINE DEI CAMPI TABELLA --- */ }
     const sortData = (key: SortKey) => {
@@ -139,7 +167,7 @@ export default function UserPage() {
                 form.reset();
 
                 //Aggiunge il nuovo utente alla tabella
-                const refreshRes = await axios.get(`http://localhost:4567/users/get?page=${page}`, {
+                const refreshRes = await axios.get(`http://localhost:4567/users/get?page=${currentPage}`, {
                     headers: { "Authorization": `Bearer ${token}` },
                 });
                 if (refreshRes.data.success) {
@@ -306,23 +334,43 @@ export default function UserPage() {
                 </div>
             )}
 
-            <div className="d-flex justify-content-between align-items-center mt-3">
+            {/* --- PAGINAZIONE --- */}
+            <div className="d-flex justify-content-between align-items-center mt-3 gap-2">
+
+                {/* PRECEDENTE */}
                 <button
-                    className="btn btn-primary"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
+                    className="btn btn-sm btn-primary"
+                    disabled={currentPage === 1}
+                    onClick={() => goToPage(currentPage - 1)}
+                    aria-label="Pagina precedente"
                 >
                     Pagina precedente
                 </button>
 
-                <span className="fw-bold text-dark">
-                    Pagina {page} di {totalPages}
-                </span>
+                {/* NUMERI */}
+                <div className="d-flex gap-2">
+                    {getPageNumbers().map((pageNum) => (
+                        <button
+                            key={pageNum}
+                            className={`btn btn-sm ${currentPage === pageNum
+                                ? "btn-primary"
+                                : "btn-outline-primary"
+                                }`}
+                            onClick={() => goToPage(pageNum)}
+                            aria-label={`Vai alla pagina ${pageNum}`}
+                            aria-current={currentPage === pageNum ? "page" : undefined}
+                        >
+                            {pageNum}
+                        </button>
+                    ))}
+                </div>
 
+                {/* SUCCESSIVO */}
                 <button
-                    className="btn btn-primary"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
+                    className="btn btn-sm btn-primary"
+                    disabled={currentPage === totalPages}
+                    onClick={() => goToPage(currentPage + 1)}
+                    aria-label="Pagina successiva"
                 >
                     Pagina successiva
                 </button>
