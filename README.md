@@ -21,7 +21,7 @@ http://localhost:3000
 per testare il funzionamento dell'applicativo
 
 ## Credenziali di prova
-username: admin1
+username: admin1  
 password: Adminpass.1
 
 Verrà generato un token di sicurezza per autenticare le chiamate.
