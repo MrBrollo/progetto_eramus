@@ -3,6 +3,7 @@ require "sinatra/cross_origin"
 require "pg"
 require "bcrypt"
 require "jwt"
+require "resend"
 require_relative "db_connection"
 require_relative "user"
 require_relative "prodotto"
@@ -48,9 +49,15 @@ post "/users/register" do
     user = User.from_json(data)
     conn = db_connection
 
-    if user.username.to_s.strip.empty? || user.password.to_s.strip.empty?
+    if user.username.to_s.strip.empty? || user.password.to_s.strip.empty? || user.email.to_s.empty?
       status 400
       return { success: false, message: "Campi obbligatori mancanti" }.to_json
+    end
+
+    email_regex = /\A[^@\s]+@[^@\s]+\.[^@\s]+\z/
+    unless user.email.match?(email_regex)
+      status 400
+      return { success: false, message: "Email non valida" }.to_json
     end
 
     check = conn.exec_params("SELECT 1 FROM utente WHERE username = $1", [user.username])
@@ -70,9 +77,9 @@ post "/users/register" do
 
     hashed_password = BCrypt::Password.create(user.password)
     conn.exec_params(
-      "INSERT INTO utente (username, password, nome, cognome, data_nascita)
-       VALUES ($1, $2, $3, $4, $5)",
-      [user.username, hashed_password, user.nome, user.cognome, user.data_nascita]
+      "INSERT INTO utente (username, password, nome, cognome, data_nascita, email)
+       VALUES ($1, $2, $3, $4, $5, $6)",
+      [user.username, hashed_password, user.nome, user.cognome, user.data_nascita, user.email]
     )
 
     status 201
@@ -173,6 +180,126 @@ get "/users/get" do
       utenti: utenti
     }.to_json
     
+  rescue PG::Error => e
+    status 500
+    { success: false, message: "Errore database: #{e.message}" }.to_json
+  ensure
+    conn&.close
+  end
+end
+
+post "/users/forgot-password" do
+  begin
+    data = JSON.parse(request.body.read)
+    email = data["email"]
+
+    if email.to_s.strip.empty?
+      status 400
+      return { success: false, message: "Email obbligatoria" }.to_json
+    end
+
+    conn = db_connection
+    result = conn.exec_params("SELECT id, username FROM utente WHERE email = $1 LIMIT 1", [email])
+
+    if result.ntuples == 0
+      status 404
+      return{ success: false, message: "Nessun utente registrato con questa email" }.to_json
+    end
+
+    user = result[0]
+
+    reset_token = JWT.encode(
+      { user_id: user["id"], exp: Time.now.to_i + 3600 },
+      SECRET_KEY,
+      "HS256"
+    )
+
+    reset_link = "http://localhost:3000/reset-password?token=#{reset_token}"
+
+    Resend.api_key = ENV["RESEND_API_KEY"]
+
+    Resend::Emails.send(
+      from: "noreply@gmail.com",
+      to: email,
+      subject: "Reimposta la tua password",
+      html: <<~HTML
+        <h2>Richiesta reset password</h2>
+        <p>Ciao <b>#{user["username"]}</b>,</p>
+        <p>Hai richiesto di reimpostare la password. Clicca sul link qui sotto:</p>
+        <a href="#{reset_link}">Reimposta password</a>
+        <p>Il link è valido per 1 ora.</p>
+      HTML
+    )
+
+    status 200
+    { success: true, message: "Email inviata con successo" }.to_json
+
+  rescue JSON::ParserError
+    status 400
+    { success: false, message: "Formato JSON non valido" }.to_json
+  rescue => e
+    status 500
+    { success: false, message: "Errore: #{e.message}" }.to_json
+  ensure
+    conn&.close
+  end
+end
+
+post "users/reset-password" do
+  begin
+    data = JSON.parse(request.body.read)
+    token = data["token"]
+    new_password = data["new_password"]
+
+    if token.to_s.strip.empty? || new_password.to_s.strip.empty?
+      status 400
+      return { success: false, message: "Token e nuova password sono obbligatori."}.to_json
+    end
+
+    password_regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/
+    unless new_password.match?(password_regex)
+      status 400
+      return {
+        success: false,
+        message: "La password non rispetta i requisiti minimi."
+      }.to_json
+    end
+
+    begin
+      decoded = JWT.decode(token, SECRET_KEY, true, { algorithm: "HS256" })
+      payload = decoded[0]
+    rescue JWT::ExpiredSignature
+      status 400
+      return { success: false, message: "Token scaduto." }.to_json
+    rescue JWT::DecodeError
+      status 400
+      return { success: false, message: "Token non valido" }.to_json
+    end
+
+    user_id = payload["user_id"]
+
+    conn = db_connection
+
+    result = conn.exec_params("SELECT id FROM utente WHERE id = $1 LIMIT 1", [user_id])
+
+    if result.ntuples == 0
+      status 404
+      return { success: false, message: "Utente non trovato." }.to_json
+    end
+
+    hashed_password = BCrypt::Password.create(new_password)
+
+    conn.exec_params(
+      "UPDATE utente SET password = $1 WHERE id = $2",
+      [hashed_password, user_id]
+    )
+
+    status 200
+    { success: true, message: "Password reimpostata con successo." }.to_json
+
+  rescue JSON::ParserError
+    status 400
+    { success: false, message: "Formato JSON non valido." }.to_json
   rescue PG::Error => e
     status 500
     { success: false, message: "Errore database: #{e.message}" }.to_json

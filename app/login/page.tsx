@@ -105,6 +105,12 @@ export default function LoginPage() {
                                         Accedi
                                     </button>
                                 </form>
+
+                                <div className="text-center mt-3">
+                                    <a href="/recupera-password" className="text-primary fw-semibold" style={{ textDecoration: "none" }}>
+                                        Recupera password
+                                    </a>
+                                </div>
                             </div>
                         </div>
 

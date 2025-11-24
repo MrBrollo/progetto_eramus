@@ -152,6 +152,7 @@ export default function UserPage() {
             nome: formData.get("nome"),
             cognome: formData.get("cognome"),
             data_nascita: formData.get("data_nascita"),
+            email: formData.get("email"),
         };
 
         try {
@@ -395,6 +396,19 @@ export default function UserPage() {
                                 id="inputUsername"
                                 name="username"
                                 placeholder="Inserisci username"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div className="col-md-6">
+                        <div className="">
+                            <label htmlFor="inputEmail">Email <span className="text-danger">*</span></label>
+                            <input
+                                type="email"
+                                className="form-control"
+                                id="inputEmail"
+                                name="email"
+                                placeholder="Inserisci email"
                                 required
                             />
                         </div>

@@ -9,6 +9,7 @@ class User
         user.nome = user_json["nome"]
         user.cognome = user_json["cognome"]
         user.data_nascita = user_json["data_nascita"]
+        user.email = data["email"]
         return user
     end
 end
