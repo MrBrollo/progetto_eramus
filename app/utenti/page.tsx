@@ -8,13 +8,14 @@ import toast from "react-hot-toast";
 interface User {
     id: number;
     username: string;
+    email: string;
     password: string;
     nome: string;
     cognome: string;
     data_nascita: string;
 }
 
-type SortKey = "id" | "username" | "nome" | "cognome" | "data_nascita" | null;
+type SortKey = "id" | "username" | "email" | "nome" | "cognome" | "data_nascita" | null;
 type SortOrder = "asc" | "desc";
 
 export default function UserPage() {
@@ -256,6 +257,28 @@ export default function UserPage() {
                                 <th scope="col">
                                     <button
                                         className="btn btn-link p-0 text-decoration-none"
+                                        onClick={() => sortData("email")}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter" || e.key === " ") {
+                                                e.preventDefault();
+                                                sortData("email");
+                                            }
+                                        }}
+                                        tabIndex={0}
+                                        aria-sort={getAriaSort("email")}
+                                        aria-label={
+                                            sortKey === "email"
+                                                ? `Ordina per email, ordine ${sortOrder === "asc" ? "crescente" : "descrescente"}`
+                                                : "Ordina per email"
+                                        }
+                                    >
+                                        Email {getSortArrow("email")}
+                                    </button>
+                                </th>
+
+                                <th scope="col">
+                                    <button
+                                        className="btn btn-link p-0 text-decoration-none"
                                         onClick={() => sortData("nome")}
                                         onKeyDown={(e) => {
                                             if (e.key === "Enter" || e.key === " ") {
@@ -325,6 +348,7 @@ export default function UserPage() {
                                 <tr key={u.id}>
                                     <td>{u.id}</td>
                                     <td>{u.username}</td>
+                                    <td>{u.email}</td>
                                     <td>{u.nome}</td>
                                     <td>{u.cognome}</td>
                                     <td>{new Date(u.data_nascita).toLocaleDateString("it-IT")}</td>

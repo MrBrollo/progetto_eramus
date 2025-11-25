@@ -167,7 +167,7 @@ get "/users/get" do
 
     # Query paginata
     result = conn.exec_params(
-      "SELECT id, username, nome, cognome, data_nascita
+      "SELECT id, username, email, nome, cognome, data_nascita
        FROM utente
        ORDER BY id ASC
        LIMIT $1 OFFSET $2",
@@ -178,6 +178,7 @@ get "/users/get" do
       {
         id: r["id"],
         username: r["username"],
+        email: r["email"],
         nome: r["nome"],
         cognome: r["cognome"],
         data_nascita: r["data_nascita"]
