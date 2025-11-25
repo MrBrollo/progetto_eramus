@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         //validazione dei campi obbligatori
@@ -18,33 +19,23 @@ export default function LoginPage() {
             return;
         }
 
-        //Validazione password secondo linee guida Agid
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s:]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            toast.error("La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale."
-            );
-            return;
-        }
-
         try {
-            const res = await fetch("http://localhost:4567/users/login", {
-                method: "POST",
+            const res = await axios.post("http://localhost:4567/users/login", {
+                username,
+                password
+            }, {
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ username, password }),
+                    "Content-Type": "application/json"
+                }
             });
 
-            const data = await res.json();
-
-            if (res.ok && data.success) {
-                localStorage.setItem("token", data.token);
+            if (res.data.success) {
+                localStorage.setItem("token", res.data.token);
                 router.push("/utenti");
             } else {
-                toast.error(data.message || "Credenziali non valide");
+                toast.error(res.data.message || "Credenziali non valide");
             }
-        } catch (err) {
+        } catch (err: any) {
             toast.error("Errore di connessione al server Ruby.");
         }
     };

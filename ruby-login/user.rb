@@ -1,5 +1,5 @@
 class User
-    attr_accessor :id, :username, :password, :nome, :cognome, :data_nascita
+    attr_accessor :id, :username, :password, :nome, :cognome, :data_nascita, :email
 
     def self.from_json(user_json)
         user = User.new
@@ -9,7 +9,7 @@ class User
         user.nome = user_json["nome"]
         user.cognome = user_json["cognome"]
         user.data_nascita = user_json["data_nascita"]
-        user.email = data["email"]
+        user.email = user_json["email"]
         return user
     end
 end

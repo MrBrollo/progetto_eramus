@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
 

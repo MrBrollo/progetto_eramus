@@ -387,7 +387,7 @@ export default function UserPage() {
             <div className="mt-5">
                 <h2 className="text-center fw-bold mb-4" style={{ color: "#1C2024" }}>Aggiungi un nuovo utente</h2>
                 <form id="form-create-user" className="row g-3" onSubmit={handleCreateUser}>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <div className="">
                             <label htmlFor="inputUsername">Username <span className="text-danger">*</span></label>
                             <input
@@ -400,7 +400,7 @@ export default function UserPage() {
                             />
                         </div>
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <div className="">
                             <label htmlFor="inputEmail">Email <span className="text-danger">*</span></label>
                             <input
@@ -413,7 +413,7 @@ export default function UserPage() {
                             />
                         </div>
                     </div>
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                         <div className="">
                             <label htmlFor="inputPassword">Password <span className="text-danger">*</span></label>
                             <input

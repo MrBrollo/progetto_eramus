@@ -3,20 +3,29 @@ GEM
   specs:
     base64 (0.3.0)
     bcrypt (3.1.20)
-    bigdecimal (3.3.1)
-    csv (3.3.5)
-    httparty (0.23.2)
-      csv
-      mini_mime (>= 1.0.0)
-      multi_xml (>= 0.5.2)
+    date (3.5.0)
+    dotenv (3.1.8)
     jwt (3.1.2)
       base64
+    logger (1.7.0)
+    mail (2.9.0)
+      logger
+      mini_mime (>= 0.1.1)
+      net-imap
+      net-pop
+      net-smtp
     mini_mime (1.1.5)
-    multi_xml (0.7.2)
-      bigdecimal (~> 3.1)
+    net-imap (0.5.12)
+      date
+      net-protocol
+    net-pop (0.1.2)
+      net-protocol
+    net-protocol (0.2.2)
+      timeout
+    net-smtp (0.5.1)
+      net-protocol
     pg (1.6.2-x64-mingw-ucrt)
-    resend (1.0.0)
-      httparty (>= 0.21.0)
+    timeout (0.4.4)
     webrick (1.9.1)
 
 PLATFORMS
@@ -24,9 +33,10 @@ PLATFORMS
 
 DEPENDENCIES
   bcrypt
+  dotenv
   jwt
+  mail
   pg
-  resend
   webrick
 
 BUNDLED WITH

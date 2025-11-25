@@ -3,7 +3,8 @@ require "sinatra/cross_origin"
 require "pg"
 require "bcrypt"
 require "jwt"
-require "resend"
+require "mail"
+require "dotenv/load"
 require_relative "db_connection"
 require_relative "user"
 require_relative "prodotto"
@@ -29,6 +30,18 @@ options "*" do
 end
 
 SECRET_KEY = ENV["JWT_SECRET"] || "key_casuale"
+
+# --- CONFIGURAZIONE SMTP ---
+Mail.defaults do
+  delivery_method :smtp, {
+    address: "smtp.gmail.com",
+    port: 587,
+    user_name: ENV["SMTP_USERNAME"],
+    password: ENV["SMTP_PASSWORD"],
+    authentication: "plain",
+    enable_starttls_auto: true
+  }
+end
 
 def verify_token(request)
   auth_header = request.env["HTTP_AUTHORIZATION"]
@@ -216,20 +229,22 @@ post "/users/forgot-password" do
 
     reset_link = "http://localhost:3000/reset-password?token=#{reset_token}"
 
-    Resend.api_key = ENV["RESEND_API_KEY"]
 
-    Resend::Emails.send(
-      from: "noreply@gmail.com",
-      to: email,
-      subject: "Reimposta la tua password",
-      html: <<~HTML
-        <h2>Richiesta reset password</h2>
-        <p>Ciao <b>#{user["username"]}</b>,</p>
-        <p>Hai richiesto di reimpostare la password. Clicca sul link qui sotto:</p>
-        <a href="#{reset_link}">Reimposta password</a>
-        <p>Il link è valido per 1 ora.</p>
-      HTML
-    )
+    Mail.deliver do
+      from ENV["SMTP_USERNAME"]
+      to email
+      subject "Reimposta la tua password"
+      html_part do
+        content_type "text/html; charset=UTF-8"
+        body <<~HTML
+          <h2>Richiesta reset password</h2>
+          <p>Ciao <b>#{user["username"]}</b>,</p>
+          <p>Hai richiesto di reimpostare la password. Clicca sul link qui sotto:</p>
+          <a href="#{reset_link}">Reimposta password</a>
+          <p>Il link è valido per 1 ora.</p>
+        HTML
+      end
+    end
 
     status 200
     { success: true, message: "Email inviata con successo" }.to_json
@@ -245,7 +260,7 @@ post "/users/forgot-password" do
   end
 end
 
-post "users/reset-password" do
+post "/users/reset-password" do
   begin
     data = JSON.parse(request.body.read)
     token = data["token"]
